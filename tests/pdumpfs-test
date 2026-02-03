@@ -15,7 +15,7 @@ cd ..
 today=$(ruby -e 'require "date"; puts Date.today.strftime("%Y/%m/%d")')
 yesterday=$(ruby -e 'require "date"; puts (Date.today - 1).strftime("%Y/%m/%d")')
 
-../pdumpfs src dest > tmp.log || exit 1
+ruby -I../lib ../bin/pdumpfs src dest > tmp.log || exit 1
 diff -r src dest/$today/src || exit 1
 mv dest/$today dest/$yesterday
 
@@ -31,7 +31,7 @@ cd src
 ln -s foo file
 cd ..
 
-../pdumpfs src dest > tmp.log || exit 1
+ruby -I../lib ../bin/pdumpfs src dest > tmp.log || exit 1
 diff -r src dest/$today/src || exit 1
 
 grep '^unchanged' tmp.log  | perl -pe 's/^unchanged\s+//' | while read i; do
@@ -52,17 +52,17 @@ done || exit 1
 rm -rf dest2
 mkdir dest2
 # no files should be copied
-../pdumpfs --exclude-by-size 0 src dest2 > tmp.log || exit 1
+ruby -I../lib ../bin/pdumpfs --exclude-by-size 0 src dest2 > tmp.log || exit 1
 test `find dest2 -type f | wc -l` = 0 || exit 1
 
 rm -rf dest3
 mkdir dest3
-../pdumpfs --exclude foo --exclude bar src dest3 > tmp.log || exit 1
+ruby -I../lib ../bin/pdumpfs --exclude foo --exclude bar src dest3 > tmp.log || exit 1
 test -z "`find dest3 -type f | egrep 'foo|bar'`" || exit 1
 
 rm -rf dest4
 mkdir dest4
-../pdumpfs --exclude-by-glob 'new*' src dest4 > tmp.log || exit 1
+ruby -I../lib ../bin/pdumpfs --exclude-by-glob 'new*' src dest4 > tmp.log || exit 1
 test -z "`find dest4 -type f | egrep new`" || exit 1
 
 rm -rf src dest dest?
