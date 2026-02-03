@@ -1,9 +1,0 @@
-directory    src
-directory    src/baz
-new_file     src/baz/quux
-symlink      src/file
-new_file     src/foo
-symlink      src/foobar
-directory    src/newdir
-directory    src/secret
-new_file     src/secret/secret
