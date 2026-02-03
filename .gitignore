@@ -2,8 +2,8 @@
 *.log
 tests/tmp.log
 
-# Generated executable (if any)
-pdumpfs
+# Generated executable (if any - legacy)
+/pdumpfs
 pdumpfs.exe
 pdumpfs.exr
 

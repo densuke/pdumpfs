@@ -1,0 +1,102 @@
+# frozen_string_literal: true
+
+require 'getoptlong'
+require 'pdumpfs'
+
+module Pdumpfs
+  class CLI
+    def self.start
+      new.main
+    end
+
+    def usage
+      puts Pdumpfs::I18n.t(:usage_header)
+      puts "  -e, --exclude=PATTERN          #{Pdumpfs::I18n.t(:usage_exclude)}"
+      puts "  -s, --exclude-by-size=SIZE     #{Pdumpfs::I18n.t(:usage_exclude_by_size)}"
+      puts "  -w, --exclude-by-glob=GLOB     #{Pdumpfs::I18n.t(:usage_exclude_by_glob)}"
+      puts "  -l, --log-file=FILE            #{Pdumpfs::I18n.t(:usage_log_file)}"
+      puts "  -v, --version                  #{Pdumpfs::I18n.t(:usage_version)}"
+      puts "  -q, --quiet                    #{Pdumpfs::I18n.t(:usage_quiet)}"
+      puts "  -n, --dry-run                  #{Pdumpfs::I18n.t(:usage_dry_run)}"
+      puts "  -h, --help                     #{Pdumpfs::I18n.t(:usage_help)}"
+      exit 0
+    end
+
+    def version
+      puts "pdumpfs #{Pdumpfs::VERSION}"
+      exit 0
+    end
+
+    def be_quiet
+      devnull = Pdumpfs.windows? ? "NUL" : "/dev/null"
+      STDOUT.reopen(devnull)
+    end
+
+    def parse_options
+      config = {}
+      patterns = []
+      globs = []
+      size = nil
+
+      parser = GetoptLong.new
+      parser.set_options(['--exclude',  '-e',  GetoptLong::REQUIRED_ARGUMENT],
+                         ['--exclude-by-size', GetoptLong::REQUIRED_ARGUMENT],
+                         ['--exclude-by-glob', GetoptLong::REQUIRED_ARGUMENT],
+                         ['--log-file', '-l',  GetoptLong::REQUIRED_ARGUMENT],
+                         ['--quiet', '-q',     GetoptLong::NO_ARGUMENT],
+                         ['--dry-run', '-n',   GetoptLong::NO_ARGUMENT],
+                         ['--help', '-h',      GetoptLong::NO_ARGUMENT],
+                         ['--version', '-v',   GetoptLong::NO_ARGUMENT],
+                         ['--backtrace',       GetoptLong::NO_ARGUMENT]
+                         )
+      parser.quiet = true
+      parser.each_option do |name, arg|
+        case name
+        when '--exclude'
+          patterns.push(Regexp.new(arg))
+        when '--exclude-by-size'
+          size = arg
+        when '--exclude-by-glob'
+          globs.push(arg)
+        when '--log-file'
+          config[:log_file] = arg
+        when '--help'
+          usage
+        when '--quiet'
+          be_quiet
+        when '--dry-run'
+          config[:dry_run] = true
+        when '--backtrace'
+          config[:backtrace] = true
+        when '--version'
+          version
+        end
+      end
+
+      config[:matcher] = if !size.nil? || !globs.empty? || !patterns.empty?
+                           FileMatcher.new(size: size,
+                                                    globs: globs,
+                                                    patterns: patterns)
+                         end
+      usage if ARGV.length < 2
+
+      src  = ARGV[0]
+      dest = ARGV[1]
+      base = ARGV[2]
+      [src, dest, base, config]
+    end
+
+    def main
+      begin
+        src, dest, base, config = parse_options
+        pdumpfs = Engine.new(config)
+        pdumpfs.validate_directories(src, dest)
+        pdumpfs.start(src, dest, base)
+      rescue StandardError => e
+        STDERR.puts "pdumpfs: #{e.message}"
+        STDERR.puts e.backtrace.join("\n") if config && config[:backtrace]
+        exit(1)
+      end
+    end
+  end
+end
