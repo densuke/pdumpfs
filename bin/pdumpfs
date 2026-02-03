@@ -5,15 +5,15 @@ $LOAD_PATH.unshift(File.expand_path('../lib', __dir__))
 require 'pdumpfs'
 
 def usage
-  puts "Usage: pdumpfs SRC DEST [BASE]"
-  puts "  -e, --exclude=PATTERN          exclude files/directories matching PATTERN"
-  puts "  -s, --exclude-by-size=SIZE     exclude files larger than SIZE"
-  puts "  -w, --exclude-by-glob=GLOB     exclude files matching GLOB"
-  puts "  -l, --log-file=FILE            write a log to FILE"
-  puts "  -v, --version                  print version information and exit"
-  puts "  -q, --quiet                    suppress all normal output"
-  puts "  -n, --dry-run                  don't actually run any commands"
-  puts "  -h, --help                     show this help message"
+  puts Pdumpfs::I18n.t(:usage_header)
+  puts "  -e, --exclude=PATTERN          #{Pdumpfs::I18n.t(:usage_exclude)}"
+  puts "  -s, --exclude-by-size=SIZE     #{Pdumpfs::I18n.t(:usage_exclude_by_size)}"
+  puts "  -w, --exclude-by-glob=GLOB     #{Pdumpfs::I18n.t(:usage_exclude_by_glob)}"
+  puts "  -l, --log-file=FILE            #{Pdumpfs::I18n.t(:usage_log_file)}"
+  puts "  -v, --version                  #{Pdumpfs::I18n.t(:usage_version)}"
+  puts "  -q, --quiet                    #{Pdumpfs::I18n.t(:usage_quiet)}"
+  puts "  -n, --dry-run                  #{Pdumpfs::I18n.t(:usage_dry_run)}"
+  puts "  -h, --help                     #{Pdumpfs::I18n.t(:usage_help)}"
   exit 0
 end
 

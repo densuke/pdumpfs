@@ -5,6 +5,7 @@ require 'fileutils'
 require 'getoptlong'
 require 'date'
 require_relative 'pdumpfs/version'
+require_relative 'pdumpfs/i18n'
 
 class File
   def self.real_file?(path)
@@ -142,7 +143,7 @@ module Pdumpfs
       end
 
       if same_directory?(src, dest) || sub_directory?(src, dest)
-        raise "cannot copy a directory, `#{src}', into itself, `#{dest}'"
+        raise Pdumpfs::I18n.t(:error_same_directory, src, dest)
       end
       # strip the trailing / to avoid basename(src) == '' for Ruby 1.6.x.
       src  = src.sub(%r{/+$}, "") unless src == '/'
@@ -378,8 +379,8 @@ module Pdumpfs
     end
 
     def validate_directories(src, dest)
-      raise "No such directory: #{src}"  unless File.directory?(src)
-      raise "No such directory: #{dest}" unless File.directory?(dest)
+      raise Pdumpfs::I18n.t(:error_no_such_directory, src)  unless File.directory?(src)
+      raise Pdumpfs::I18n.t(:error_no_such_directory, dest) unless File.directory?(dest)
 
       if ::Pdumpfs.windows?
         # Windows specifics check
