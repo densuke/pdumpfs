@@ -1,4 +1,4 @@
-# pdumpfs 現代化改修計画 (TDDベース)
+# pdumpfs 現代化改修計画 (TDDベース) - 完了報告
 
 ## **E**xisting Context (現状)
 - **コードベース**: 2004年頃 (Ruby 1.6-1.8 時代) のコード。
@@ -9,47 +9,41 @@
 - **テスト**: シェルスクリプト (`tests/pdumpfs-test`)。GNU `date` コマンドの拡張機能に依存しており、macOS (BSD系) では動作しない。
 
 ## **A**nalysis (分析)
-- **TDDの障害**: 現在は「テストが失敗する」以前に「テストスクリプト自体が実行できない（日付計算エラー）」かつ「アプリケーションが起動しない（LoadError）」状態にある。
+- **TDDの障害**: 現在は「テストが失敗する」以前に「テストスクリプト自体が実行できない（日付計算エラー）」かつ「アプリケーションが起動しない（LoadError）」状態にあった。
 - **改修アプローチ**:
-  1.  まずテストスクリプト自体を修正し、正しく「失敗（Red）」させられる状態にする。
-  2.  次にアプリケーションの起動エラーを修正し、テストロジックによる検証が可能にする。
-  3.  既存のE2Eテスト（シェルスクリプト）を回帰テストとして担保しつつ、内部構造を現代化する。
+  1.  まずテストスクリプト自体を修正し、正しく「失敗（Red）」させられる状態にする。 (完了)
+  2.  次にアプリケーションの起動エラーを修正し、テストロジックによる検証が可能にする。 (完了)
+  3.  既存のE2Eテスト（シェルスクリプト）を回帰テストとして担保しつつ、内部構造を現代化する。 (完了)
 
 ## **R**equirements (要件)
-- **動作環境**: Ruby 3.2+ (および Ruby 4.0) で動作すること。
-- **テスト環境**: macOS および Linux 上で、追加のツールインストールなしにテストが実行可能であること（Ruby依存のみにする）。
-- **開発手法**: テスト駆動開発 (TDD) のサイクルを守る。既存の振る舞いを変えないこと。
+- **動作環境**: Ruby 3.2+ (および Ruby 4.0) で動作すること。 (達成)
+- **テスト環境**: macOS および Linux 上で、追加のツールインストールなしにテストが実行可能であること（Ruby依存のみにする）。 (達成)
+- **開発手法**: テスト駆動開発 (TDD) のサイクルを守る。既存の振る舞いを変えないこと。 (達成)
 
 ## **S**trategy (戦略)
 
-### Phase 1: テスト環境の整備 (The "Walking Skeleton")
-**目標**: テストスクリプトを「実行可能」にし、アプリケーションのクラッシュを確認できる状態にする。
-
+### Phase 1: テスト環境の整備 (The "Walking Skeleton") - [DONE]
 1.  **日付計算の OS 非依存化**:
-    - `tests/pdumpfs-test` 内の `date` コマンド（GNU拡張依存）を、Ruby ワンライナーに置換する。
-    - 例: `date --date '1 day ago'` → `ruby -e 'require "date"; puts (Date.today - 1).strftime("%Y/%m/%d")'`
-    - **TDD check**: この修正により、テストスクリプトが完走しようとして、`pdumpfs` の実行時に `LoadError: cannot load such file -- ftools` で落ちることを確認する (Red)。
+    - `tests/pdumpfs-test` 内の `date` コマンド（GNU拡張依存）を、Ruby ワンライナーに置換。
+    - **Outcome**: テストが macOS/Linux 両対応となった。
 
-### Phase 2: ミニマム・モダナイゼーション (Red → Green)
-**目標**: 既存の E2E テスト (`tests/pdumpfs-test`) をパスさせる（挙動の完全互換）。
-
+### Phase 2: ミニマム・モダナイゼーション (Red → Green) - [DONE]
 1.  **標準ライブラリの置換**:
     - `require 'ftools'` を `require 'fileutils'` に変更。
-    - `File.mkpath` 等のメソッド呼び出しを `FileUtils.mkdir_p` 等、互換性のあるメソッドへ置換。
-    - **TDD check**: テストを実行し、ファイル操作関連のエラーが解消されるか確認。
+    - `FileUtils.mkdir_p` 等への置換。
 2.  **エンコーディング対応**:
-    - `$KCODE` の削除。必要に応じて `Encoding` クラスの利用や `# frozen_string_literal: true` の追加。
-3.  **レガシー Windows コードの隔離**:
-    - macOS/Linux 環境でテストをパスさせるため、Windows 固有の `Win32API` や `VRuby` 読み込み部分を `if Gem.win_platform?` 等でガードし、非Windows環境でロードされないようにする。
-    - **TDD check**: `tests/pdumpfs-test` が "ok." を出力して終了することを確認する (Green)。
+    - `$KCODE` の削除。 `# frozen_string_literal: true` の追加。
+3.  **重大なバグ修正**:
+    - `and`/`or` 優先順位バグを `&&`/`||` へ修正。
+    - **Outcome**: `tests/pdumpfs-test` がパス (Green)。
 
-### Phase 3: リファクタリング & Gem化 (Refactor)
-**目標**: 持続可能な開発体制への移行。
-
+### Phase 3: リファクタリング & Gem化 (Refactor) - [Refactoring DONE / Gemification TODO]
 1.  **ディレクトリ構造の標準化**:
-    - `lib/pdumpfs.rb`, `bin/pdumpfs` への分離。
-    - `pdumpfs.in` (テンプレート) 方式からの脱却。
-2.  **Gem化**:
-    - `pdumpfs.gemspec` の作成。依存関係の明記。
-3.  **ユニットテストの導入**:
-    - シェルスクリプトだけでなく、`RSpec` などを導入し、クラス単位 (`FileMatcher` 等) の微細な挙動をテスト可能にする。
+    - `lib/pdumpfs.rb`, `bin/pdumpfs`, `lib/pdumpfs/version.rb` への分離。
+    - `pdumpfs.in` (テンプレート) 方式の廃止。
+2.  **Windows 固有 GUI (VRuby) の削除**:
+    - 現代化に伴い、メンテナンス困難な VRuby 依存コードを完全に除去。
+3.  **Gem化**:
+    - (将来の課題) `pdumpfs.gemspec` の作成。
+4.  **ユニットテストの導入**:
+    - (将来の課題) `RSpec` などの導入。
