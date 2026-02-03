@@ -10,15 +10,15 @@ module Pdumpfs
     end
 
     def usage
-      puts Pdumpfs::I18n.t(:usage_header)
-      puts "  -e, --exclude=PATTERN          #{Pdumpfs::I18n.t(:usage_exclude)}"
-      puts "  -s, --exclude-by-size=SIZE     #{Pdumpfs::I18n.t(:usage_exclude_by_size)}"
-      puts "  -w, --exclude-by-glob=GLOB     #{Pdumpfs::I18n.t(:usage_exclude_by_glob)}"
-      puts "  -l, --log-file=FILE            #{Pdumpfs::I18n.t(:usage_log_file)}"
-      puts "  -v, --version                  #{Pdumpfs::I18n.t(:usage_version)}"
-      puts "  -q, --quiet                    #{Pdumpfs::I18n.t(:usage_quiet)}"
-      puts "  -n, --dry-run                  #{Pdumpfs::I18n.t(:usage_dry_run)}"
-      puts "  -h, --help                     #{Pdumpfs::I18n.t(:usage_help)}"
+      puts ::Pdumpfs::I18n.t(:usage_header)
+      puts "  -e, --exclude=PATTERN          #{::Pdumpfs::I18n.t(:usage_exclude)}"
+      puts "  -s, --exclude-by-size=SIZE     #{::Pdumpfs::I18n.t(:usage_exclude_by_size)}"
+      puts "  -w, --exclude-by-glob=GLOB     #{::Pdumpfs::I18n.t(:usage_exclude_by_glob)}"
+      puts "  -l, --log-file=FILE            #{::Pdumpfs::I18n.t(:usage_log_file)}"
+      puts "  -v, --version                  #{::Pdumpfs::I18n.t(:usage_version)}"
+      puts "  -q, --quiet                    #{::Pdumpfs::I18n.t(:usage_quiet)}"
+      puts "  -n, --dry-run                  #{::Pdumpfs::I18n.t(:usage_dry_run)}"
+      puts "  -h, --help                     #{::Pdumpfs::I18n.t(:usage_help)}"
       exit 0
     end
 
