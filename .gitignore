@@ -1,0 +1,16 @@
+# Log files
+*.log
+tests/tmp.log
+
+# Generated executable (if any)
+pdumpfs
+pdumpfs.exe
+pdumpfs.exr
+
+# OS metadata
+.DS_Store
+
+# Temporary test data
+tests/src/
+tests/dest/
+tests/dest?/
