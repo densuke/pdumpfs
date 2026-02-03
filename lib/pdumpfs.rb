@@ -143,7 +143,7 @@ module Pdumpfs
       end
 
       if same_directory?(src, dest) || sub_directory?(src, dest)
-        raise Pdumpfs::I18n.t(:error_same_directory, src, dest)
+        raise ::Pdumpfs::I18n.t(:error_same_directory, src, dest)
       end
       # strip the trailing / to avoid basename(src) == '' for Ruby 1.6.x.
       src  = src.sub(%r{/+$}, "") unless src == '/'
@@ -379,8 +379,8 @@ module Pdumpfs
     end
 
     def validate_directories(src, dest)
-      raise Pdumpfs::I18n.t(:error_no_such_directory, src)  unless File.directory?(src)
-      raise Pdumpfs::I18n.t(:error_no_such_directory, dest) unless File.directory?(dest)
+      raise ::Pdumpfs::I18n.t(:error_no_such_directory, src)  unless File.directory?(src)
+      raise ::Pdumpfs::I18n.t(:error_no_such_directory, dest) unless File.directory?(dest)
 
       if ::Pdumpfs.windows?
         # Windows specifics check
