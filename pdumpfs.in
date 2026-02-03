@@ -48,21 +48,21 @@
 #
 
 require 'find'
-require 'ftools'
+require 'fileutils'
 require 'getoptlong'
 require 'date'
 
 class File
   def self.real_file? (path)
-    File.file?(path) and not File.symlink?(path)
+    File.file?(path) && !File.symlink?(path)
   end
 
   def self.anything_exist? (path)
-    File.exist?(path) or File.symlink?(path)
+    File.exist?(path) || File.symlink?(path)
   end
 
   def self.real_directory? (path)
-    File.directory?(path) and not File.symlink?(path)
+    File.directory?(path) && !File.symlink?(path)
   end
 
   def self.force_symlink (src, dest)
@@ -79,7 +79,7 @@ class File
   end
 
   def self.readable_file? (path)
-    File.file?(path) and File.readable?(path)
+    File.file?(path) && File.readable?(path)
   end
 
   def self.split_all (path)
@@ -232,7 +232,6 @@ if windows?
 
   def init
     locale_name = get_locale_name
-    $KCODE = "SJIS" if locale_name == "JPN"
   end
 
   init
@@ -809,11 +808,11 @@ module Pdumpfs
     def exclude? (path)
       stat = File.lstat(path)
 
-      if @size >= 0 and stat.file? and stat.size >= @size
+      if @size >= 0 && stat.file? && stat.size >= @size
         return true
       elsif @patterns.find {|pattern| pattern.match(path) }
         return true
-      elsif stat.file? and
+      elsif stat.file? &&
           @globs.find {|glob| File.fnmatch(glob, File.basename(path)) }
         return true
       end
@@ -868,7 +867,7 @@ module Pdumpfs
       today  = File.join(dest, datedir(start_time), base)
 
       File.umask(0077)
-      File.mkpath(today) unless @dry_run
+      FileUtils.mkdir_p(today) unless @dry_run
       if latest
         update_snapshot(src, latest, today)
       else
@@ -904,8 +903,8 @@ module Pdumpfs
     end
 
     def same_file? (f1, f2)
-      File.real_file?(f1) and File.real_file?(f2) and
-        File.size(f1) == File.size(f2) and File.mtime(f1) == File.mtime(f2)
+      File.real_file?(f1) && File.real_file?(f2) &&
+        File.size(f1) == File.size(f2) && File.mtime(f1) == File.mtime(f2)
     end
 
     def datedir (date)
@@ -925,7 +924,7 @@ module Pdumpfs
       Dir.glob(glob_path).sort {|a, b| b <=> a }.find {|dir|
         day, month, year = File.split_all(dir).reverse.map {|x| x.to_i }
         path = File.join(dir, base)
-        if File.directory?(path) and Date.valid_date?(year, month, day) and
+        if File.directory?(path) && Date.valid_date?(year, month, day) &&
             past_date?(year, month, day, start_time)
           return path
         end
@@ -967,7 +966,7 @@ module Pdumpfs
       if File.real_directory?(src)
         type = "directory"
       else
-        if latest and File.real_file?(latest)
+        if latest && File.real_file?(latest)
           case File.ftype(src)
           when "file"
             if same_file?(src, latest)
@@ -1018,7 +1017,7 @@ module Pdumpfs
 
       case type
       when "directory"
-        File.mkpath(today)
+        FileUtils.mkdir_p(today)
       when "unchanged"
         File.force_link(latest, today)
       when "updated"
@@ -1089,7 +1088,7 @@ module Pdumpfs
 
           case type
           when "directory"
-            File.mkpath(t)
+            FileUtils.mkdir_p(t)
           when "new_file"
             copy(s, t)
           when "symlink"
@@ -1192,7 +1191,7 @@ def parse_options
     end
   end
 
-  config[:matcher] = unless size.nil? and globs.empty? and patterns.empty?
+  config[:matcher] = unless size.nil? && globs.empty? && patterns.empty?
                        Pdumpfs::FileMatcher.new(:size     => size,
                                                 :globs    => globs,
                                                 :patterns => patterns)
