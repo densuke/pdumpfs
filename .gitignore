@@ -14,3 +14,4 @@ pdumpfs.exr
 tests/src/
 tests/dest/
 tests/dest?/
+*.gem
